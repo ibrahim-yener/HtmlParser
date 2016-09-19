@@ -36,7 +36,6 @@ public class HtmlParser
 		else
 		{
 			cleanComments = new CleanComments(str);
-			// this.stringToParse = str;
 		}
 	}
 
@@ -77,7 +76,6 @@ public class HtmlParser
 		}
 
 		cleanComments = new CleanComments(getUrlSource(url).toString());
-		// this.stringToParse = getUrlSource(url).toString();
 	}
 
 	/**
@@ -150,7 +148,8 @@ public class HtmlParser
 	}
 
 	/**
-	 * Quick access and extract only JavaScript code block(s) if find any.
+	 * Quick access and extract only JavaScript code block(s) if find any.<br>
+	 * This method does <b>NOT</b> return external JavaScript files.
 	 * <p>
 	 * 
 	 * @param index
@@ -207,21 +206,35 @@ public class HtmlParser
 		
 		ArrayList<String> img = new ArrayList<String>();
 
-		String imgReg = "<[Ii][Mm][Gg]\\s*([Ss][Rr][Cc]\\s*=\\s*[\"'].*?[\"'])";
+		String imgReg = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
 
-		Pattern pattern = Pattern.compile(imgReg);
+		Pattern pattern = Pattern.compile(imgReg, Pattern.CASE_INSENSITIVE);
 		Matcher match = pattern.matcher(cleanComments.stringToParse());
 
-		System.out.println("TOPLAM = " + match.groupCount());
-
-		if (match.find())
+		while (match.find())
 		{
-			String result = match.group();
-
-			System.out.println(result);
+			img.add(match.group());
 		}
 
-		return img;
+		
+		ArrayList<String> imgList = new ArrayList<String>();
+		
+		if(index > 0)
+		{
+			for(int i = 0; i < img.size(); i++)
+			{
+				if((i + 1) <= index)
+				{
+					imgList.add(img.get(i));
+				}
+			}
+			
+			return imgList;
+		}
+		else
+		{
+			return img;
+		}
 	}
 
 	private StringBuilder getUrlSource(URL url) throws UnsupportedEncodingException, IOException
