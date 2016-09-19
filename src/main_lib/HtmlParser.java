@@ -6,16 +6,17 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import utils.CannotBeNullException;
+import utils.CleanComments;
 import utils.HttpsNotSupportedExeption;
+import utils.RemoveComment;
 
 public class HtmlParser
 {
-	/**
-	 * String will be parsed
-	 */
-	private String	stringToParse	= "";
+	private CleanComments	cleanComments;
 
 	/**
 	 * Constructor for regular String
@@ -34,10 +35,9 @@ public class HtmlParser
 		}
 		else
 		{
-			this.stringToParse = str;
+			cleanComments = new CleanComments(str);
+			// this.stringToParse = str;
 		}
-
-		System.out.println(this.stringToParse);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class HtmlParser
 	{
 		String convert = url.toString();
 
-		/**
+		/*
 		 * Check to see url empty or not
 		 */
 		if (convert.length() < 2)
@@ -68,7 +68,7 @@ public class HtmlParser
 			throw new CannotBeNullException("Parsing string cannot be null.");
 		}
 
-		/**
+		/*
 		 * Check to see if user trying HTTPS protocol in here
 		 */
 		if (url.getProtocol().equals("https"))
@@ -76,42 +76,63 @@ public class HtmlParser
 			throw new HttpsNotSupportedExeption("Currently, this protocol is not supported.");
 		}
 
-		this.stringToParse = getUrlSource(url).toString();
+		cleanComments = new CleanComments(getUrlSource(url).toString());
+		// this.stringToParse = getUrlSource(url).toString();
 	}
 
 	/**
-	 * Constructor for Web page. Pass full URL to this constructor. Once URL
-	 * passes, constructor connect {@link} and try to get source code.
+	 * If you want to exclude HTML comments call this method<br>
+	 * and set parameter TRUE.
 	 * <p>
-	 * This constructor will NOT work password protected and Login required
-	 * pages.
 	 * 
-	 * @param url
-	 *            MUST be HTTPS protocol. For normal connection, please use
-	 *            HttpParse(URL url)
-	 * @throws IOException
-	 * @throws UnsupportedEncodingException
-	 * @throws CannotBeNullException
-	 * @throws HttpFormatException
-	 * 
-	 * 
-	 *             public HtmlParser(URL url, boolean https) throws
-	 *             CannotBeNullException, UnsupportedEncodingException,
-	 *             IOException, HttpFormatException { String convert =
-	 *             url.toString();
-	 * 
-	 *             /** Check to see url empty or not / if (convert.length() < 2)
-	 *             { throw new
-	 *             CannotBeNullException("Parsing string cannot be null."); }
-	 * 
-	 *             /** Check to see if user trying HTTP protocol in here / if
-	 *             (url.getProtocol().equals("http")) { throw new
-	 *             HttpFormatException("Protocol exception."); }
-	 * 
-	 *             //this.stringToParse = getUrlSource(url).toString();
-	 * 
-	 *             System.out.println(this.stringToParse); }
+	 * @param remove
+	 *            boolean value
+	 * @return void
 	 */
+	public void removeHtmlComment(boolean remove)
+	{
+		// Remove HTML comments ONLY if user set it true
+		if (remove == true)
+		{
+			RemoveComment.REMOVE_HTML_COMMENTS = remove;
+		}
+	}
+
+	/**
+	 * If you want to exclude CSS comments call this method<br>
+	 * and set parameter TRUE.
+	 * <p>
+	 * 
+	 * @param remove
+	 *            boolean value
+	 * @return void
+	 */
+	public void removeCssComment(boolean remove)
+	{
+		// Remove CSS comments ONLY if user set it true
+		if (remove == true)
+		{
+			RemoveComment.REMOVE_CSS_COMMENTS = remove;
+		}
+	}
+
+	/**
+	 * If you want to exclude JavaScript comments call this method<br>
+	 * and set parameter TRUE.
+	 * <p>
+	 * 
+	 * @param remove
+	 *            boolean value
+	 * @return void
+	 */
+	public void removeJavaScriptComment(boolean remove)
+	{
+		// Remove JavaScript comments ONLY if user set it true
+		if (remove == true)
+		{
+			RemoveComment.REMOVE_JAVASCRIPT_COMMENTS = remove;
+		}
+	}
 
 	/**
 	 * Parameters must be ArrayList
@@ -124,57 +145,82 @@ public class HtmlParser
 	public ArrayList<String> htmlTagToExtract(ArrayList<String> tags)
 	{
 		ArrayList<String> result = new ArrayList<String>();
-		
-		
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Quick access and extract only JavaScript code block(s) if find any.
-	 * <p> 
-	 * @param index -1 returns all Script. If you want specific script then type index number. 0 is first JavaScript code block
+	 * <p>
 	 * 
-	 * @return Specified or all JavaScript codes as StringBuilder if found. Returns null otherwise.
+	 * @param index
+	 *            -1 returns all Script. If you want specific script then type
+	 *            index number. 0 is first JavaScript code block
+	 * 
+	 * @return Specified or all JavaScript codes as StringBuilder if found.
+	 *         Returns null otherwise.
 	 */
 	public StringBuilder getOnlyJavaScript(int index)
 	{
 		StringBuilder scriptOnly = new StringBuilder();
-		
-		
-		
+
 		return scriptOnly;
 	}
-	
+
 	/**
 	 * Quick access and extract all HREF tags in given String or URL.
 	 * <p>
-	 * @param index -1 returns all HREF tags. If you want specified amount of tag send it as parameter.<br>
-	 * For example: getOnlyUrl(10) return only 10 HREF tags from beginning of BODY.
 	 * 
-	 * @return Specified amount or all HREF tag as ArrayList or return null if can't find any.
+	 * @param index
+	 *            -1 returns all HREF tags. If you want specified amount of tag
+	 *            send it as parameter.<br>
+	 *            For example: getOnlyUrl(10) return only 10 HREF tags from
+	 *            beginning of BODY.
+	 * 
+	 * @return Specified amount or all HREF tag as ArrayList or return null if
+	 *         can't find any.
 	 */
 	public ArrayList<String> getOnlyUrl(int index)
 	{
 		ArrayList<String> urls = new ArrayList<String>();
-		
-		
+
 		return urls;
 	}
-	
+
 	/**
 	 * Quick access and extract all Images in given String or URL.
 	 * <p>
-	 * @param index -1 returns all IMAGE tags. If you want specified amount of tag send it as parameter.<br>
-	 * For example: getOnlyImage(10) return only 10 IMAGE tags from beginning of BODY.
 	 * 
-	 * @return Specified amount or all IMAGE tag as ArrayList or return null if can't find any.
+	 * @param index
+	 *            -1 returns all IMAGE tags. If you want specified amount of tag
+	 *            send it as parameter.<br>
+	 *            For example: getOnlyImage(10) return only 10 IMAGE tags from
+	 *            beginning of BODY.
+	 * 
+	 * @return Specified amount or all IMAGE tag as ArrayList or return null if
+	 *         can't find any.
 	 */
 	public ArrayList<String> getOnlyImage(int index)
 	{
+		//	Clean up process
+		cleanUp();
+		
 		ArrayList<String> img = new ArrayList<String>();
-		
-		
+
+		String imgReg = "<[Ii][Mm][Gg]\\s*([Ss][Rr][Cc]\\s*=\\s*[\"'].*?[\"'])";
+
+		Pattern pattern = Pattern.compile(imgReg);
+		Matcher match = pattern.matcher(cleanComments.stringToParse());
+
+		System.out.println("TOPLAM = " + match.groupCount());
+
+		if (match.find())
+		{
+			String result = match.group();
+
+			System.out.println(result);
+		}
+
 		return img;
 	}
 
@@ -193,5 +239,29 @@ public class HtmlParser
 		reader.close();
 
 		return output;
+	}
+
+	/*
+	 * Let's clean unwanted comments from HTML code.
+	 */
+	private void cleanUp()
+	{
+		// If set true then clean HTML
+		if (RemoveComment.REMOVE_HTML_COMMENTS)
+		{
+			cleanComments.cleanHtmlComments();
+		}
+		
+		// If set true then clean CSS
+		if (RemoveComment.REMOVE_CSS_COMMENTS)
+		{
+			cleanComments.cleanCssComments();
+		}
+		
+		// If set true then clean JavaScript
+		if (RemoveComment.REMOVE_JAVASCRIPT_COMMENTS)
+		{
+			cleanComments.cleanJavaScriptComments();
+		}
 	}
 }
