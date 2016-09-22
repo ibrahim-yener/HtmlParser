@@ -167,6 +167,21 @@ public class HtmlParser
 	}
 
 	/**
+	 * Quick access and extract only StyleSheet (CSS) block(s) if find any.<br>
+	 * This method does <b>NOT</b> return external StyleSheet files.
+	 * <p>
+	 * 
+	 * @return Returns all CSS styles as StringBuilder if found. Returns null
+	 *         otherwise.
+	 */
+	public StringBuilder getOnlyStyleSheet()
+	{
+		StringBuilder styleOnly = new StringBuilder();
+
+		return styleOnly;
+	}
+
+	/**
 	 * Quick access and extract all HREF tags in given String or URL.
 	 * <p>
 	 * 
@@ -175,13 +190,41 @@ public class HtmlParser
 	 *            send it as parameter.<br>
 	 *            For example: getOnlyUrl(10) return only 10 HREF tags from
 	 *            beginning of BODY.
-	 * 
+	 *            <p>
+	 * @param isExternalOnly
+	 *            If set this parameter to TRUE then it will extract only url
+	 *            starts with HTTP or WWW. If set to FALSE then extract
+	 *            everything within HREF.
+	 *            <p>
 	 * @return Specified amount or all HREF tag as ArrayList or return null if
 	 *         can't find any.
 	 */
-	public ArrayList<String> getOnlyUrl(int index)
+	public ArrayList<String> getOnlyUrl(int index, boolean isExternalOnly)
 	{
+		// Clean up process
+		cleanUp();
+
 		ArrayList<String> urls = new ArrayList<String>();
+
+		String urlReg = "";
+
+		if (!isExternalOnly)
+		{
+			urlReg = "href=\"([^\"]*)\"";
+		}
+		else
+		{
+			urlReg = "\\(?\\b(http://|www[.])[-A-Za-z0-9+&amp;@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&amp;@#/%=~_()|]";
+		}
+
+		Pattern pattern = Pattern.compile(urlReg, Pattern.CASE_INSENSITIVE);
+		Matcher match = pattern.matcher(cleanComments.stringToParse());
+
+		while (match.find())
+		{
+			// img.add(match.group());
+			System.out.println("LINK = " + match.group());
+		}
 
 		return urls;
 	}
@@ -201,9 +244,9 @@ public class HtmlParser
 	 */
 	public ArrayList<String> getOnlyImage(int index)
 	{
-		//	Clean up process
+		// Clean up process
 		cleanUp();
-		
+
 		ArrayList<String> img = new ArrayList<String>();
 
 		String imgReg = "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>";
@@ -216,19 +259,18 @@ public class HtmlParser
 			img.add(match.group());
 		}
 
-		
 		ArrayList<String> imgList = new ArrayList<String>();
-		
-		if(index > 0)
+
+		if (index > 0)
 		{
-			for(int i = 0; i < img.size(); i++)
+			for (int i = 0; i < img.size(); i++)
 			{
-				if((i + 1) <= index)
+				if ((i + 1) <= index)
 				{
 					imgList.add(img.get(i));
 				}
 			}
-			
+
 			return imgList;
 		}
 		else
@@ -264,13 +306,13 @@ public class HtmlParser
 		{
 			cleanComments.cleanHtmlComments();
 		}
-		
+
 		// If set true then clean CSS
 		if (RemoveComment.REMOVE_CSS_COMMENTS)
 		{
 			cleanComments.cleanCssComments();
 		}
-		
+
 		// If set true then clean JavaScript
 		if (RemoveComment.REMOVE_JAVASCRIPT_COMMENTS)
 		{
